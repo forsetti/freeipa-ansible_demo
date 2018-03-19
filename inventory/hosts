@@ -1,0 +1,8 @@
+[fedora_libvirt_hosts]
+localhost ansible_user=root ansible_connection=local ansible_become=true
+
+[fedora_freeipa_server]
+ipa-1.ipa.example.com ansible_host=192.168.122.3
+
+[fedora_systems]
+ipa-1.ipa.example.com

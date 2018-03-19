@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PB=playbook.yml
+CMD=ansible-playbook
+
+if ! ( sudo -l -n > /dev/null ); then
+  CMD="$CMD --ask-sudo-pass"
+fi
+
+
+if [ -e "$1" ]; then PB=$1; fi
+
+time ( $CMD $PB )
+
+rm -f *.retry

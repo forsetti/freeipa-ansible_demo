@@ -1,0 +1,10 @@
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      addresses:
+        - {{ ip4.cidr }}
+      gateway4: {{ ip4.gateway }}
+      nameservers:
+        addresses: [8.8.8.8]
