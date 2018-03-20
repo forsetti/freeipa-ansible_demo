@@ -1,0 +1,15 @@
+- hosts: fedora_libvirt_hosts
+  roles:
+    - rhmjs.fedora27_libvirt_host
+
+- hosts: ansible_control_nodes
+  gather_facts: false
+  roles:
+    - rhmjs.fedora27_qcow2_libvirt_guest
+#    - rhmjs.ansible_control_node
+  tasks:
+    - name: Copy ansible project to Ansible control nodes
+      debug: msg="hi"
+
+    - name: Execute Ansible playbooks from control nodes
+      debug: msg="hi"

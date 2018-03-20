@@ -1,8 +1,0 @@
-ip4:
-  cidr: "192.168.122.3/24"
-  gateway: "192.168.122.1"
-
-libvirt_domain:
-  memoryM: 512
-
-libvirt_host: localhost

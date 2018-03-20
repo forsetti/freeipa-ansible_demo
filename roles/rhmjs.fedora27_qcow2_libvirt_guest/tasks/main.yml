@@ -1,29 +1,36 @@
 - block:
-  - name: Copy Fedora DVD
-    copy: src="{{ fedora_repo_iso }}" dest="{{ hostvars[libvirt_host].libvirt_storage_directory }}"
 
-  - name: Copy Fedora qcow2 base
-    copy: src="{{ fedora_qcow2 }}" dest="{{ hostvars[libvirt_host].libvirt_storage_directory }}"
+  - name: Fetch Fedora qcow2 base
+    get_url:
+      url: "{{ fedora_qcow2_url }}"
+      dest: "{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ fedora_qcow2 }}"
+      checksum: "{{ fedora_qcow2_checksum }}"
+
+  - name: Fetch Fedora DVD
+    get_url:
+      url: "{{ fedora_iso_url }}"
+      dest: "{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ fedora_iso }}"
+      checksum: "{{ fedora_iso_checksum }}"
 
   - name: Create instance qcow2 image layer
     command: qemu-img create -f qcow2 -b "{{ fedora_qcow2 }}" {{ inventory_hostname }}.qcow2
     args:
-      creates: "{{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.qcow2"
-      chdir: "{{ hostvars[libvirt_host].libvirt_storage_directory }}"
+      creates: "{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.qcow2"
+      chdir: "{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}"
 
   - name: Create directory for cloud-init media preparation
-    file: state="directory" path="{{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.cloud-init.d"
+    file: state="directory" path="{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.cloud-init.d"
 
   - name: Create cloud-init user-data
-    template: dest="{{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.cloud-init.d/user-data" src=user-data.j2
+    template: dest="{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.cloud-init.d/user-data" src=user-data.j2
     register: user_data_reg
 
   - name: Create cloud-init meta-data
-    template: dest="{{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.cloud-init.d/meta-data" src=meta-data.j2
+    template: dest="{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.cloud-init.d/meta-data" src=meta-data.j2
     register: meta_data_reg
 
   - name: Create cloud-init media
-    command: mkisofs -output {{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.cloud-init.iso -volid cidata -joliet -rock "{{ hostvars[libvirt_host].libvirt_storage_directory }}/{{ inventory_hostname }}.cloud-init.d/."
+    command: mkisofs -output {{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.cloud-init.iso -volid cidata -joliet -rock "{{ hostvars[libvirt_host].libvirt_storage_pool.root }}/{{ hostvars[libvirt_host].libvirt_storage_pool.name }}/{{ inventory_hostname }}.cloud-init.d/."
     when: user_data_reg.changed or meta_data_reg.changed
 
   - name: Fetch current VM list
@@ -48,10 +55,6 @@
   - name: Checking for SSH on {{ hostvars[inventory_hostname].ansible_host | default(inventory_hostname) }}
     wait_for: port=22 host="{{ hostvars[inventory_hostname].ansible_host | default(inventory_hostname) }}" search_regex=OpenSSH
 
-  delegate_to: "{{ hostvars[libvirt_host].ansible_host | default(libvirt_host) }}"
-
-- name: Connect via SSH once to capture new host key
-  command: ssh  -oStrictHostKeyChecking=no -oPasswordAuthentication=no {{ inventory_hostname }} echo hi
-  delegate_to: localhost
-  register: ssh_result
-  failed_when: ssh_result.rc!=0 and ssh_result.rc!=255
+  delegate_to: "{{ hostvars[libvirt_host].ansible_user | default(ansible_user) }}@{{ hostvars[libvirt_host].ansible_host | default(libvirt_host) }}"
+  become: true
+  become_user: root

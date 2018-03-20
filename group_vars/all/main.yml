@@ -1,0 +1,14 @@
+fedora_iso: Fedora-Server-dvd-x86_64-27-1.6.iso
+fedora_iso_url: https://download.fedoraproject.org/pub/fedora/linux/releases/27/Server/x86_64/iso/{{ fedora_iso }}
+fedora_iso_checksum: sha256:e383dd414bb57231b20cbed11c4953cac71785f7d4f5990b0df5ad534a0ba95c
+
+fedora_qcow2: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
+fedora_qcow2_url: https://download.fedoraproject.org/pub/fedora/linux/releases/27/CloudImages/x86_64/images/{{ fedora_qcow2 }}
+fedora_qcow2_checksum: sha256:5af84b59b9c8c132adf4989fc8f20c6a0297b1b53ce992014d934a51cccdd4c9
+
+demo_network:
+  name: demo
+  cidr: 192.168.37.0/24
+  gateway: 192.168.37.1
+
+demo_domain: example.test

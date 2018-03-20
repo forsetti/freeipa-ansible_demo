@@ -1,0 +1,10 @@
+<pool type='{{ libvirt_storage_pool.type }}'>
+  <name>{{ libvirt_storage_pool.name }}</name>
+  <source>
+    <device path='{{ libvirt_storage_pool.path }}'/>
+    <format type='auto'/>
+  </source>
+  <target>
+    <path>{{ libvirt_storage_pool.root }}/{{ libvirt_storage_pool.name }}</path>
+  </target>
+</pool>

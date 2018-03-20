@@ -1,0 +1,13 @@
+libvirt_storage_pool:
+  type: fs
+  name: USB_VMSTORE
+  path: /dev/disk/by-label/VMSTORE
+  root: /var/lib/libvirt/images
+
+libvirt_network:
+  name: "{{ demo_network.name }}"
+  cidr: "{{ demo_network.cidr }}"
+  gateway: "{{ demo_network.gateway }}"
+  dhcp_start: "{{ demo_network.cidr | ipaddr('16')| ipaddr('address') }}"
+  dhcp_end: "{{ demo_network.cidr | ipaddr('-2') | ipaddr('address') }}"
+  bridge_name: virbr37

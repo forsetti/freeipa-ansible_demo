@@ -1,0 +1,53 @@
+- hosts: demo_host
+  tasks:
+    - name : Get list of all VMs
+      virt:
+        command: list_vms
+        uri: qemu:///system
+      register: vmlist_reg
+
+    - name: Force off VM {{ item }}
+      virt:
+        state: destroyed
+        name: "{{ item }}"
+        uri: qemu:///system
+      with_items: "{{ vmlist_reg.list_vms }}"
+
+    - name: Delete VM {{ item }}
+      virt:
+        command: undefine
+        name: "{{ item }}"
+        uri: qemu:///system
+      with_items: "{{ vmlist_reg.list_vms }}"
+
+    - name: Delete qcow2 files
+      file: state='absent' path='{{ libvirt_storage_pool.root }}/{{ libvirt_storage_pool.name }}/{{ item }}.qcow2'
+      with_items: "{{ vmlist_reg.list_vms }}"
+
+    - name: Delete cloud-init media
+      file: state='absent' path='{{ libvirt_storage_pool.root }}/{{ libvirt_storage_pool.name }}/{{ item }}.cloud-init.iso'
+      with_items: "{{ vmlist_reg.list_vms }}"
+
+    - name: Delete cloud-init prep directory
+      file: state='absent' path='{{ libvirt_storage_pool.root }}/{{ libvirt_storage_pool.name }}/{{ item }}.cloud-init.d'
+      with_items: "{{ vmlist_reg.list_vms }}"
+
+    - name: Deactivate network
+      virt_net:
+        state: inactive
+        name: "{{ libvirt_network.name }}"
+
+    - name: Delete network
+      virt_net:
+        command: undefine
+        name: "{{ libvirt_network.name }}"
+
+    - name: Deactivate Storage Pool
+      virt_pool:
+        state: inactive
+        name: "{{ libvirt_storage_pool.name }}"
+
+    - name: Delete libvirt storage pool
+      virt_pool:
+        command: undefine
+        name: "{{ libvirt_storage_pool.name }}"

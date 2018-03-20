@@ -1,21 +1,17 @@
 #cloud-config
-user: fedora
+user: ansible
 chpasswd: { expire: False }
-ssh_pwauth: True
+lock_passwd: True
+ssh_pwauth: False
 ssh_authorized_keys:
-  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvv7GYukBv9GtoaQV8dArjwPTPrGjoBca4w5pauKJblR4panKqwT/5DTk7XQ/nwcVU/rq1x6o3de9sVaccRmcOOwzsI/7nO/AiFZLrIgbWbdTNUy++eor/VIqM9FdK1UerHTeGXcI2c+k6rxaU3NpHKTXA93UuIwRdzYvuFsAktfmpJ6Q8o4M+3PNDnYEQ5GyEfKy+/jfPQp8AoJYHFnDDkQ27C87jYECwIO/plnOUJEKUIexzlSWcer5+PlabkI/cth+4jJXbqLSUDZFDP51YM03TyECiwKctIFT0/F8fdGM3XstYKLZuNY1zbt3ouBGkkt6UDHWpMdQ73IafkEvj
-chpasswd:
-  list: |
-     root:password
-     fedora:fedora
-  expire: False
+  - "{{ lookup('file', ssh_pubkey_file) }}"
+
+users:
+  - default
+    lock_passwd: true
 
 bootcmd:
  - [ sh, -c, echo "=========bootcmd=========" ]
 
 runcmd:
  - [ sh, -c, echo "=========runcmd=========" ]
-
-# add any ssh public keys
-#ssh_authorized_keys:
-#  - ssh-rsa AAA...example...SDvZ user1@domain.com

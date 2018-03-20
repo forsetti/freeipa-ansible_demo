@@ -1,0 +1,10 @@
+ip4:
+  cidr: "{{ demo_network.cidr | ipaddr('3') }}"
+  gateway: "{{ demo_network.gateway }}"
+
+ansible_host: "{{ ip4.cidr | ipaddr('address') }}"
+
+libvirt_domain:
+  memoryM: 512
+
+libvirt_host: demo_host
